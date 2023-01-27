@@ -58,7 +58,7 @@ void Trajectory::UndistortScan(const PosCloud &scan_raw,
 
   std::size_t cnt = 0;
   for (auto const &raw_p : scan_raw.points) {
-    if (pcl_isnan(raw_p.x)) {
+    if (std::isnan(raw_p.x)) {
       scan_in_target.is_dense = false;
       std::cout << RED << "[UndistortScan] input cloud exists NAN point\n"
                 << RESET;

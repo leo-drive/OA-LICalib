@@ -33,10 +33,12 @@
 #include <sensor_data/lidar_feature.h>
 #include <utils/math_utils.h>
 #include <utils/eigen_utils.hpp>
-
+#include <nav_msgs/msg/odometry.hpp>
 namespace liso {
 
-class LidarNdtOdometry {
+class LidarNdtOdometry : public rclcpp::Node
+{
+//class LidarNdtOdometry {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<LidarNdtOdometry> Ptr;
@@ -119,10 +121,10 @@ class LidarNdtOdometry {
   }
 
  private:
-  ros::NodeHandle nh_;
-  ros::Publisher pub_global_map_;
-  ros::Publisher pub_current_cloud_;
-  ros::Publisher pub_laser_odometry_;
+//  rclcpp::NodeHandle nh_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_global_map_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_current_cloud_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_laser_odometry_;
 
   double ndt_resolution_;
   double ndt_key_frame_downsample_;

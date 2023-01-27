@@ -21,6 +21,7 @@
  */
 
 #include <calib/lidar_localization.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace liso {
 
@@ -42,11 +43,11 @@ LIDARLocalization::LIDARLocalization(double ndt_resolution,
 
 void LIDARLocalization::RegisterPubSub() {
   pub_global_map_ =
-      nh_.advertise<sensor_msgs::PointCloud2>("localization/global_map", 1);
+          this->create_publisher<sensor_msgs::msg::PointCloud2>("localization/global_map", 1);
   pub_current_cloud_ =
-      nh_.advertise<sensor_msgs::PointCloud2>("localization/cur_cloud", 1);
+          this->create_publisher<sensor_msgs::msg::PointCloud2>("localization/cur_cloud", 1);
   pub_laser_odometry_ =
-      nh_.advertise<nav_msgs::Odometry>("localization/laser_odom", 10);
+          this->create_publisher<nav_msgs::msg::Odometry>("localization/laser_odom", 10);
 }
 
 void LIDARLocalization::SetPriorMap(std::string map_pcd_path) {
@@ -55,7 +56,8 @@ void LIDARLocalization::SetPriorMap(std::string map_pcd_path) {
 
   //* load the file
   if (pcl::io::loadPCDFile<pcl::PointXYZ>(map_pcd_path, *cloud) == -1) {
-    ROS_WARN("Couldn't read file %s \n", map_pcd_path.c_str());
+    RCLCPP_WARN(rclcpp::get_logger("test"),"Couldn't read file %s \n",(map_pcd_path.c_str()));
+
     return;
   }
 
@@ -91,7 +93,7 @@ void LIDARLocalization::SetPriorMap(const LiDARFeature& map_cloud) {
   // prepare prior map msg
   pcl::toROSMsg(*map_cloud_ds, map_msg_);
   map_msg_.header.frame_id = "/map";
-  map_msg_.header.stamp = ros::Time::now();
+  map_msg_.header.stamp = rclcpp::Clock().now();
 
   std::cout << "[SetPriorMap] prior map size " << map_cloud_ds->size() << "\n";
 }
@@ -212,17 +214,17 @@ void LIDARLocalization::CaculateGlobalMapAndOdom(
 }
 
 void LIDARLocalization::PublishCloudAndOdom(const PosCloud::Ptr& cur_scan) {
-  ros::Time time_now = ros::Time::now();
+  rclcpp::Time time_now = rclcpp::Clock().now();
 
   static bool has_pub_map = false;
-  if (pub_global_map_.getNumSubscribers() > 0 && !has_pub_map) {
+  if (pub_global_map_->get_subscription_count() > 0 && !has_pub_map) {
     has_pub_map = true;
     map_msg_.header.stamp = time_now;
-    pub_global_map_.publish(map_msg_);
+    pub_global_map_->publish(map_msg_);
   }
 
-  if (pub_laser_odometry_.getNumSubscribers() > 0 && !odom_data_.empty()) {
-    nav_msgs::Odometry odom_msg;
+  if (pub_laser_odometry_->get_subscription_count() > 0 && !odom_data_.empty()) {
+    nav_msgs::msg::Odometry odom_msg;
     odom_msg.header.stamp = time_now;
     odom_msg.header.frame_id = "/map";
 
@@ -236,10 +238,10 @@ void LIDARLocalization::PublishCloudAndOdom(const PosCloud::Ptr& cur_scan) {
     odom_msg.pose.pose.orientation.y = quat.y();
     odom_msg.pose.pose.orientation.z = quat.z();
     odom_msg.pose.pose.orientation.w = quat.w();
-    pub_laser_odometry_.publish(odom_msg);
+    pub_laser_odometry_->publish(odom_msg);
   }
 
-  if (pub_current_cloud_.getNumSubscribers() > 0 && cur_scan != nullptr) {
+  if (pub_current_cloud_->get_subscription_count() > 0 && cur_scan != nullptr) {
     PosCloud::Ptr filtered_cloud(new PosCloud);
     cloud_filter_.setInputCloud(cur_scan);
     cloud_filter_.filter(*filtered_cloud);
@@ -252,12 +254,12 @@ void LIDARLocalization::PublishCloudAndOdom(const PosCloud::Ptr& cur_scan) {
     PosCloud::Ptr transform_cloud(new PosCloud);
     pcl::transformPointCloud(*filtered_cloud, *transform_cloud, T_cur_to_map);
 
-    sensor_msgs::PointCloud2 cloud_msg;
+    sensor_msgs::msg::PointCloud2 cloud_msg;
     pcl::toROSMsg(*transform_cloud, cloud_msg);
     cloud_msg.header.frame_id = "/map";
     cloud_msg.header.stamp = time_now;
 
-    pub_current_cloud_.publish(cloud_msg);
+    pub_current_cloud_->publish(cloud_msg);
   }
 }
 

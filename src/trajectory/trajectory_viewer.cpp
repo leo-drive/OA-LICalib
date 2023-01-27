@@ -21,39 +21,38 @@
  */
 
 #include <trajectory/trajectory_viewer.h>
-
 namespace liso {
 
 namespace publisher {
-ros::Publisher pub_trajectory_raw_;
-ros::Publisher pub_trajectory_est_;
-ros::Publisher pub_imu_raw_array_;
-ros::Publisher pub_imu_est_array_;
-ros::Publisher pub_target_cloud_;
-ros::Publisher pub_source_cloud_;
+rclcpp::Publisher pub_trajectory_raw_;
+rclcpp::Publisher pub_trajectory_est_;
+rclcpp::Publisher pub_imu_raw_array_;
+rclcpp::Publisher pub_imu_est_array_;
+rclcpp::Publisher pub_target_cloud_;
+rclcpp::Publisher pub_source_cloud_;
 
-ros::Publisher pub_spline_trajectory_;
-ros::Publisher pub_lidar_trajectory_;
+rclcpp::Publisher pub_spline_trajectory_;
+rclcpp::Publisher pub_lidar_trajectory_;
 
 void SetPublisher(ros::NodeHandle &nh) {
   /// Vicon data
-  pub_trajectory_raw_ = nh.advertise<oa_licalib::pose_array>("/path_raw", 10);
+  pub_trajectory_raw_ = nh.advertise<oa_licalib::msg::pose_array>("/path_raw", 10);
   pub_trajectory_est_ = nh.advertise<oa_licalib::pose_array>("/path_est", 10);
   /// IMU fitting results
   pub_imu_raw_array_ = nh.advertise<oa_licalib::imu_array>("/imu_raw_array", 10);
   pub_imu_est_array_ = nh.advertise<oa_licalib::imu_array>("/imu_est_array", 10);
   /// lidar matching results
   pub_target_cloud_ =
-      nh.advertise<sensor_msgs::PointCloud2>("/target_cloud", 10);
+      nh.advertise<sensor_msgs::msg::PointCloud2>("/target_cloud", 10);
   pub_source_cloud_ =
-      nh.advertise<sensor_msgs::PointCloud2>("/source_cloud", 10);
+      nh.advertise<sensor_msgs::msg::PointCloud2>("/source_cloud", 10);
 
   /// spline trajectory
   pub_spline_trajectory_ =
-      nh.advertise<nav_msgs::Path>("/spline_trajectory", 10);
+      nh.advertise<nav_msgs::msg::Path>("/spline_trajectory", 10);
 
   /// spline trajectory
-  pub_lidar_trajectory_ = nh.advertise<nav_msgs::Path>("/lidar_trajectory", 10);
+  pub_lidar_trajectory_ = nh.advertise<nav_msgs::msg::Path>("/lidar_trajectory", 10);
 }
 
 }  // namespace publisher

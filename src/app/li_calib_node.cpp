@@ -22,8 +22,8 @@
 
 #include <calib/calib_helper.h>
 #include <pangolin/pangolin.h>
-#include <ros/package.h>
-#include <ros/ros.h>
+//#include <ros/package.h>
+#include <rclcpp/rclcpp.hpp>
 #include <trajectory/trajectory_viewer.h>
 #include <string>
 
@@ -72,7 +72,7 @@ class CalibUI : public LICalibrHelper {
   }
 
   void RenderingLoop() {
-    while (!pangolin::ShouldQuit() && ros::ok()) {
+    while (!pangolin::ShouldQuit() && rclcpp::ok()) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       this->calib_param_manager_->calib_option.opt_time_offset =

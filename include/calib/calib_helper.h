@@ -23,7 +23,8 @@
 #ifndef CALIB_HELPER_H
 #define CALIB_HELPER_H
 
-#include <ros/package.h>
+//#include <ros/package.h>
+
 #include <string>
 
 #include <calib/calib_tool.h>

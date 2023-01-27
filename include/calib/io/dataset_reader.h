@@ -24,23 +24,23 @@
 #define DATASET_READER_H
 
 /// read rosbag
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
+
+//#include <rosbag/bag.h>
+//#include <rosbag/view.h>
 #include <boost/foreach.hpp>
 #define foreach BOOST_FOREACH
-
 /// ros message
-#include <geometry_msgs/TransformStamped.h>
-#include <nav_msgs/Odometry.h>
-#include <sensor_msgs/Imu.h>
+#include <geometry_msgs/msg/transform_stamped.h>
+#include <nav_msgs/msg/odometry.h>
+#include <sensor_msgs/msg/imu.h>
 
 #include <pcl_conversions/pcl_conversions.h>  /// fromROSMsg toROSMsg
 
 #include <sensor_data/cloud_type.h>
 #include <sensor_data/imu_data.h>
 
-#include <sensor_data/lidar_ouster.h>
-#include <sensor_data/lidar_rs_16.h>
+//#include <sensor_data/lidar_ouster.h>
+//#include <sensor_data/lidar_rs_16.h>
 #include <sensor_data/lidar_vlp_16.h>
 #include <sensor_data/lidar_vlp_points.h>
 
@@ -70,16 +70,16 @@ inline bool loadmsg(const std::string bag_path, const std::string topic,
   // Start a few seconds in from the full view time
   // If we have a negative duration then use the full bag length
   view_full.addQuery(bag);
-  ros::Time time_init = view_full.getBeginTime();
-  time_init += ros::Duration(bag_start);
-  ros::Time time_finish = (bag_durr < 0) ? view_full.getEndTime()
+  rclcpp::Time time_init = view_full.getBeginTime();
+  time_init += rclcpp::Duration(bag_start);
+  rclcpp::Time time_finish = (bag_durr < 0) ? view_full.getEndTime()
                                          : time_init + ros::Duration(bag_durr);
   view.addQuery(bag, rosbag::TopicQuery(topics), time_init, time_finish);
 
   // Check to make sure we have data to play
   if (view.size() == 0) {
-    ROS_ERROR("No messages to play on specified topics.  Exiting.");
-    ros::shutdown();
+    RCLCPP_ERROR(rclcpp::get_logger("test"),"No messages to play on specified topics.  Exiting.");
+    rclcpp::shutdown();
     return EXIT_FAILURE;
   }
 
@@ -92,7 +92,7 @@ inline bool loadmsg(const std::string bag_path, const std::string topic,
     }
   }
 
-  ROS_INFO("load topic %s", topic.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("test"),"load topic %s", topic.c_str());
   ROS_INFO(
       "time start | end | duration= %.6f | %.6f | %.3f",
       msgs.at(0)->header.stamp.toSec(), msgs.back()->header.stamp.toSec(),
@@ -108,7 +108,7 @@ class LioDataset {
   void Init() {
     velodyne16_convert_ = nullptr;
     vlp_point_convert_ = nullptr;
-    p_robosense_convert_ = nullptr;
+//    p_robosense_convert_ = nullptr;
 
     if (lidar_model_ == VLP_16_packet || lidar_model_ == VLP_16_SIMU) {
       velodyne16_convert_ = std::make_shared<Velodyne16>();
@@ -119,29 +119,29 @@ class LioDataset {
       vlp_point_convert_ = std::make_shared<VelodynePoints>(vlp_type);
       std::cout << "LiDAR model set as velodyne_points." << std::endl;
     }  //
-    else if (lidar_model_ == Ouster_16_points ||
-             lidar_model_ == Ouster_32_points ||
-             lidar_model_ == Ouster_64_points ||
-             lidar_model_ == Ouster_128_points) {
-      OusterRingNo ring_no = OusterRingNo::Ring128;
-      if (lidar_model_ == Ouster_16_points)
-        ring_no = Ring16;
-      else if (lidar_model_ == Ouster_32_points)
-        ring_no = Ring32;
-      else if (lidar_model_ == Ouster_64_points)
-        ring_no = Ring64;
-      else if (lidar_model_ == Ouster_128_points)
-        ring_no = Ring128;
+//    else if (lidar_model_ == Ouster_16_points ||
+//             lidar_model_ == Ouster_32_points ||
+//             lidar_model_ == Ouster_64_points ||
+//             lidar_model_ == Ouster_128_points) {
+//      OusterRingNo ring_no = OusterRingNo::Ring128;
+//      if (lidar_model_ == Ouster_16_points)
+//        ring_no = Ring16;
+//      else if (lidar_model_ == Ouster_32_points)
+//        ring_no = Ring32;
+//      else if (lidar_model_ == Ouster_64_points)
+//        ring_no = Ring64;
+//      else if (lidar_model_ == Ouster_128_points)
+//        ring_no = Ring128;
 
-      ouster_convert_ = std::make_shared<OusterLiDAR>(ring_no);
-      lidar_model_ = LidarModelType::Ouster;
-      std::cout << "LiDAR model set as Ouster " << int(ring_no) << " points.\n";
-    }  //
-    else if (lidar_model_ == RS_16) {
-      p_robosense_convert_ = std::make_shared<RobosenseCorrection>(
-          RobosenseCorrection::ModelType::RS_16);
-      std::cout << "LiDAR model set as RS_16." << std::endl;
-    }  //
+//      ouster_convert_ = std::make_shared<OusterLiDAR>(ring_no);
+//      lidar_model_ = LidarModelType::Ouster;
+//      std::cout << "LiDAR model set as Ouster " << int(ring_no) << " points.\n";
+//    }  //
+//    else if (lidar_model_ == RS_16) {
+//      p_robosense_convert_ = std::make_shared<RobosenseCorrection>(
+//          RobosenseCorrection::ModelType::RS_16);
+//      std::cout << "LiDAR model set as RS_16." << std::endl;
+//    }  //
     else {
       std::cout << "LiDAR model " << lidar_model_ << " not support yet."
                 << std::endl;
@@ -161,9 +161,9 @@ class LioDataset {
     topics.push_back(lidar_topic);
     if (vicon_topic != "") topics.push_back(vicon_topic);
 
-    if (lidar_model_ == LidarModelType::RS_16) {
-      topics.push_back("/rslidar_packets_difop");
-    }
+//    if (lidar_model_ == LidarModelType::RS_16) {
+//      topics.push_back("/rslidar_packets_difop");
+//    }
 
     rosbag::View view_full;
     view_full.addQuery(*bag_);
@@ -178,17 +178,17 @@ class LioDataset {
                   time_finish + delta_durr);
     // bag_start_time_ = view_full.getBeginTime().toSec();
 
-    if (lidar_model_ == LidarModelType::RS_16) {
-      for (rosbag::MessageInstance const m : view) {
-        const std::string &topic = m.getTopic();
-        if (topic == "/rslidar_packets_difop") {
-          rslidar_msgs::rslidarPacket::ConstPtr difop_msg =
-              m.instantiate<rslidar_msgs::rslidarPacket>();
-          p_robosense_convert_->processDifop(difop_msg);
-          break;
-        }
-      }
-    }
+//    if (lidar_model_ == LidarModelType::RS_16) {
+//      for (rosbag::MessageInstance const m : view) {
+//        const std::string &topic = m.getTopic();
+//        if (topic == "/rslidar_packets_difop") {
+//          rslidar_msgs::rslidarPacket::ConstPtr difop_msg =
+//              m.instantiate<rslidar_msgs::rslidarPacket>();
+//          p_robosense_convert_->processDifop(difop_msg);
+//          break;
+//        }
+//      }
+//    }
 
     double first_imu_stamp = -1;
     for (rosbag::MessageInstance const m : view) {
@@ -218,18 +218,18 @@ class LioDataset {
           vlp_point_convert_->get_organized_and_raw_cloud(scan_msg,
                                                           lidar_feature);
         }  //
-        else if (lidar_model_ == Ouster) {
-          sensor_msgs::PointCloud2::ConstPtr scan_msg =
-              m.instantiate<sensor_msgs::PointCloud2>();
-          timestamp = scan_msg->header.stamp.toSec();
-          ouster_convert_->get_organized_and_raw_cloud(scan_msg, lidar_feature);
-        }  //
-        else if (lidar_model_ == RS_16) {
-          rslidar_msgs::rslidarScan::ConstPtr rs_msg =
-              m.instantiate<rslidar_msgs::rslidarScan>();
-          timestamp = rs_msg->header.stamp.toSec();
-          p_robosense_convert_->unpack_scan(rs_msg, lidar_feature);
-        }
+//        else if (lidar_model_ == Ouster) {
+//          sensor_msgs::PointCloud2::ConstPtr scan_msg =
+//              m.instantiate<sensor_msgs::PointCloud2>();
+//          timestamp = scan_msg->header.stamp.toSec();
+//          ouster_convert_->get_organized_and_raw_cloud(scan_msg, lidar_feature);
+//        }  //
+//        else if (lidar_model_ == RS_16) {
+//          rslidar_msgs::rslidarScan::ConstPtr rs_msg =
+//              m.instantiate<rslidar_msgs::rslidarScan>();
+//          timestamp = rs_msg->header.stamp.toSec();
+//          p_robosense_convert_->unpack_scan(rs_msg, lidar_feature);
+//        }
 
         lidar_feature.time_max = 0;
 
@@ -406,8 +406,8 @@ class LioDataset {
 
   Velodyne16::Ptr velodyne16_convert_;
   VelodynePoints::Ptr vlp_point_convert_;
-  OusterLiDAR::Ptr ouster_convert_;
-  RobosenseCorrection::Ptr p_robosense_convert_;
+//  OusterLiDAR::Ptr ouster_convert_;
+//  RobosenseCorrection::Ptr p_robosense_convert_;
 
   LidarModelType lidar_model_;
 };

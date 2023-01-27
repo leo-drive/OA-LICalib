@@ -22,15 +22,15 @@
 
 #pragma once
 
-#include <angles/angles.h>
+//#include <angles/angles.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl_ros/point_cloud.h>
-#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <rclcpp/rclcpp.hpp>
 #include <iostream>
 #include <vector>
 
 #include <sensor_data/lidar_feature.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud.hpp>
 
 namespace liso {
 
@@ -49,10 +49,11 @@ class OusterLiDAR {
       : ouster_ring_No_(ring_no), num_firing_(2048) {}
 
   void get_organized_and_raw_cloud(
-      const sensor_msgs::PointCloud2::ConstPtr &lidarMsg,
+      const sensor_msgs::msg::PointCloud2::ConstPtr &lidarMsg,
       LiDARFeature &output) {
     OusterPointCloud pc_in;
     pcl::fromROSMsg(*lidarMsg, pc_in);
+
 
     int ring_number = int(ouster_ring_No_);
     int ring_step = pc_in.height / ring_number;

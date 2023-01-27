@@ -99,7 +99,7 @@ void ScanUndistortion::UndistortScanInMap(
 #else
     for (int k = 0; k < scan_in_target->size(); k += 3) {
       const auto& p_in = scan_in_target->points[k];
-      if (pcl_isnan(p_in.x)) continue;
+      if (std::isnan(p_in.x)) continue;
 
       PosPoint p;
       p.x = p_in.x;
@@ -164,7 +164,7 @@ void ScanUndistortion::Undistort(std::shared_ptr<Trajectory> trajectory,
   for (int h = 0; h < scan_raw->height; h++) {
     for (int w = 0; w < scan_raw->width; w++) {
       PosPoint vpoint;
-      if (pcl_isnan(scan_raw->at(w, h).x)) {
+      if (std::isnan(scan_raw->at(w, h).x)) {
         vpoint = NanPoint;
         scan_in_target->at(w, h) = vpoint;
         continue;

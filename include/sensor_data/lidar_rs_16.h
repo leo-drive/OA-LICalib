@@ -28,8 +28,8 @@
 
 #include <angles/angles.h>
 #include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <pcl_ros/msg/point_cloud.h>
+#include <sensor_msgs/msg/point_cloud.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <iostream>
@@ -45,7 +45,10 @@ namespace liso {
  * @brief The LidarCorrection class
  * robosense
  */
-class RobosenseCorrection {
+
+class RobosenseCorrection
+    {
+//class RobosenseCorrection {
   typedef pcl::PointXYZI VPoint;
   typedef pcl::PointCloud<VPoint> VPointCloud;
 

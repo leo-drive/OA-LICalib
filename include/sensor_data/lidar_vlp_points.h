@@ -25,12 +25,12 @@
 #include <angles/angles.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl_ros/point_cloud.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <iostream>
 #include <vector>
 
 #include <sensor_data/lidar_feature.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/PointCloud2.hpp>
 
 namespace liso {
 
@@ -98,7 +98,7 @@ class VelodynePoints {
     }
   }
 
-  bool check_cloud_field(const sensor_msgs::PointCloud2::ConstPtr &cloud_msg,
+  bool check_cloud_field(const sensor_msgs::msg::PointCloud2::ConstPtr &cloud_msg,
                          std::string descri) const {
     bool has_the_field = false;
     for (size_t i = 0; i < cloud_msg->fields.size(); ++i) {
@@ -111,7 +111,7 @@ class VelodynePoints {
     if (!has_the_field) {
       std::cout << "\n\t PointCloud2 not has channel [" << descri
                 << "].\n\t please configure your point cloud data!";
-      ROS_WARN("PointCloud2 not has channel [%s]", descri.c_str());
+      RCLCPP_WARN(rclcpp::get_logger("test"),"PointCloud2 not has channel [%s]", descri.c_str());
     }
     return has_the_field;
   }
@@ -156,14 +156,14 @@ class VelodynePoints {
     }
   }
 
-  bool InitScanParam(const sensor_msgs::PointCloud2::ConstPtr &lidarMsg) {
+  bool InitScanParam(const sensor_msgs::msg::PointCloud2::ConstPtr &lidarMsg) {
     has_time_field_ = check_cloud_field(lidarMsg, "time");
     has_ring_field_ = check_cloud_field(lidarMsg, "ring");
 
     // if (!has_ring_field_) return false;
 
     if (!has_time_field_) {
-      ROS_WARN(
+      RCLCPP_WARN(rclcpp::get_logger("test"),
           "Input PointCloud2 not has channel [time]. Calculate timestamp "
           "of each point assuming constant rotation speed");
     }
@@ -176,8 +176,8 @@ class VelodynePoints {
 
     double rotation_travelled = 0;
     for (auto const &point_in : cloud) {
-      if (pcl_isnan(point_in.x) || pcl_isnan(point_in.y) ||
-          pcl_isnan(point_in.z))
+      if (std::isnan(point_in.x) || std::isnan(point_in.y) ||
+              std::isnan(point_in.z))
         continue;
       // std::cout << point_in.x << ", " << point_in.y << "\n";
 
@@ -200,7 +200,7 @@ class VelodynePoints {
   }
 
   void get_organized_and_raw_cloud(
-      const sensor_msgs::PointCloud2::ConstPtr &lidarMsg,
+      const sensor_msgs::msg::PointCloud2::ConstPtr &lidarMsg,
       LiDARFeature &output) {
     if (first_msg_) {
       bool ret = InitScanParam(lidarMsg);
@@ -252,8 +252,8 @@ class VelodynePoints {
     for (int i = 0; i < pc_in.size(); ++i) {
       const RTPoint &point_in = pc_in.points[i];
 
-      if (pcl_isnan(point_in.x) || pcl_isnan(point_in.y) ||
-          pcl_isnan(point_in.z))
+      if (std::isnan(point_in.x) || std::isnan(point_in.y) ||
+              std::isnan(point_in.z))
         continue;
 
       double horizon_angle = atan2(point_in.y, point_in.x) * rad2deg;
@@ -323,7 +323,7 @@ class VelodynePoints {
                 << "/" << firing_order_positive_cnt << "/"
                 << firing_order_reverse_cnt << "]\n";
 
-      ROS_WARN("check out the caculation of horizon_angle.");
+      RCLCPP_WARN(rclcpp::get_logger("test"),"check out the caculation of horizon_angle.");
     }
     // pcl::io::savePCDFileBinaryCompressed(
     //     "/home/ha/ros_ws/catkin_liso/pc_out.pcd", *output.full_features);

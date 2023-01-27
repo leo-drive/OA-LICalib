@@ -21,9 +21,10 @@
  */
 
 #pragma once
-
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <nav_msgs/Odometry.h>
+#include <rclcpp/rclcpp.hpp>
+//#include <geometry_msgs/msg/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 #include <Eigen/Eigen>
 #include <memory>
 #include <pcl/kdtree/impl/kdtree_flann.hpp>
@@ -36,7 +37,7 @@
 
 namespace liso {
 
-class LIDARLocalization {
+class LIDARLocalization  : public rclcpp::Node{
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<LIDARLocalization> Ptr;
@@ -115,12 +116,11 @@ class LIDARLocalization {
   }
 
  private:
-  ros::NodeHandle nh_;
+//  ros::NodeHandle nh_;
 
-  ros::Publisher pub_global_map_;
-  ros::Publisher pub_current_cloud_;
-  ros::Publisher pub_laser_odometry_;
-
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_global_map_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_current_cloud_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_laser_odometry_;
   Eigen::Matrix4d init_pose_;
 
   double ndt_resolution_;
@@ -129,7 +129,7 @@ class LIDARLocalization {
   NDTRegistration::Ptr ndt_registration_;
 
   LiDARFeature prior_map_;
-  sensor_msgs::PointCloud2 map_msg_;
+  sensor_msgs::msg::PointCloud2 map_msg_;
   pcl::VoxelGrid<PosPoint> map_filter_;
 
   pcl::VoxelGrid<PosPoint> cloud_filter_;

@@ -30,12 +30,14 @@
 #include <trajectory/se3_trajectory.h>
 
 namespace liso {
-
-class ScanUndistortion {
+class ScanUndistortion
+{
+//class ScanUndistortion {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  explicit ScanUndistortion() {}
+  explicit ScanUndistortion(const rclcpp::NodeOptions & options);
+//  explicit ScanUndistortion() {}
 
   void UndistortScan(std::shared_ptr<Trajectory> trajectory,
                      const std::vector<LiDARFeature>& scan_data_raw,

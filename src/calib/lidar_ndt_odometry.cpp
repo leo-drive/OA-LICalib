@@ -21,8 +21,8 @@
  */
 
 #include <calib/lidar_ndt_odometry.h>
-#include <nav_msgs/Odometry.h>
-
+#include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
 namespace liso {
 
 LidarNdtOdometry::LidarNdtOdometry(double ndt_resolution,
@@ -35,11 +35,11 @@ LidarNdtOdometry::LidarNdtOdometry(double ndt_resolution,
 
 void LidarNdtOdometry::RegisterPubSub() {
   pub_global_map_ =
-      nh_.advertise<sensor_msgs::PointCloud2>("ndt_odometry/global_map", 1);
+      nh_.advertise<sensor_msgs::msg::PointCloud2>("ndt_odometry/global_map", 1);
   pub_current_cloud_ =
-      nh_.advertise<sensor_msgs::PointCloud2>("ndt_odometry/cur_cloud", 1);
+      nh_.advertise<sensor_msgs::msg::PointCloud2>("ndt_odometry/cur_cloud", 1);
   pub_laser_odometry_ =
-      nh_.advertise<nav_msgs::Odometry>("ndt_odometry/laser_odom", 10);
+      nh_.advertise<nav_msgs::msg::Odometry>("ndt_odometry/laser_odom", 10);
 }
 
 void LidarNdtOdometry::FeedScan(LiDARFeature cur_scan,
@@ -114,7 +114,8 @@ bool LidarNdtOdometry::CheckKeyScan(const OdomData &odom_data) {
 
 void LidarNdtOdometry::PublishCloudAndOdom(const PosCloud::Ptr &cur_scan,
                                            bool pub_map) {
-  ros::Time time_now = ros::Time::now();
+  rclcpp::Time time_now = rclcpp::Clock().now();
+
 
   if (pub_global_map_.getNumSubscribers() > 0 && pub_map) {
     pcl::VoxelGrid<PosPoint> map_filter;
@@ -124,7 +125,7 @@ void LidarNdtOdometry::PublishCloudAndOdom(const PosCloud::Ptr &cur_scan,
     map_filter.setInputCloud(global_feature_.full_features);
     map_filter.filter(*map_cloud_ds);
 
-    sensor_msgs::PointCloud2 map_msg;
+    sensor_msgs::msg::PointCloud2 map_msg;
     pcl::toROSMsg(*map_cloud_ds, map_msg);
     map_msg.header.frame_id = "/map";
     map_msg.header.stamp = time_now;
@@ -133,7 +134,7 @@ void LidarNdtOdometry::PublishCloudAndOdom(const PosCloud::Ptr &cur_scan,
   }
 
   if (pub_laser_odometry_.getNumSubscribers() > 0 && !odom_data_.empty()) {
-    nav_msgs::Odometry odom_msg;
+    nav_msgs::msg::Odometry odom_msg;
     odom_msg.header.stamp = time_now;
     odom_msg.header.frame_id = "/map";
 
@@ -164,7 +165,7 @@ void LidarNdtOdometry::PublishCloudAndOdom(const PosCloud::Ptr &cur_scan,
     PosCloud::Ptr transform_cloud(new PosCloud);
     pcl::transformPointCloud(*filtered_cloud, *transform_cloud, T_cur_to_map);
 
-    sensor_msgs::PointCloud2 cloud_msg;
+    sensor_msgs::msg::PointCloud2 cloud_msg;
     pcl::toROSMsg(*transform_cloud, cloud_msg);
     cloud_msg.header.frame_id = "/map";
     cloud_msg.header.stamp = time_now;

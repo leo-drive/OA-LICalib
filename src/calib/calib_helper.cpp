@@ -21,7 +21,7 @@
  */
 
 #include <calib/calib_helper.h>
-
+#include <boost/filesystem.hpp>
 namespace liso {
 
 LICalibrHelper::LICalibrHelper(const YAML::Node& node)
@@ -94,19 +94,21 @@ void LICalibrHelper::LoadDataset(const YAML::Node& node) {
     lidar_model_type = LidarModelType::VLP_16_points;
   } else if (lidar_model == "VLP_32E_points") {
     lidar_model_type = LidarModelType::VLP_32E_points;
-  } else if (lidar_model == "Ouster_16_points") {
-    lidar_model_type = LidarModelType::Ouster_16_points;
-  } else if (lidar_model == "Ouster_32_points") {
-    lidar_model_type = LidarModelType::Ouster_32_points;
-  } else if (lidar_model == "Ouster_64_points") {
-    lidar_model_type = LidarModelType::Ouster_64_points;
-  } else if (lidar_model == "Ouster_128_points") {
-    lidar_model_type = LidarModelType::Ouster_128_points;
-  } else if (lidar_model == "RS_16") {
-    lidar_model_type = LidarModelType::RS_16;
-  } else {
+  }
+//  } else if (lidar_model == "Ouster_16_points") {
+//    lidar_model_type = LidarModelType::Ouster_16_points;
+//  } else if (lidar_model == "Ouster_32_points") {
+//    lidar_model_type = LidarModelType::Ouster_32_points;
+//  } else if (lidar_model == "Ouster_64_points") {
+//    lidar_model_type = LidarModelType::Ouster_64_points;
+//  } else if (lidar_model == "Ouster_128_points") {
+//    lidar_model_type = LidarModelType::Ouster_128_points;
+//  } else if (lidar_model == "RS_16") {
+//    lidar_model_type = LidarModelType::RS_16;
+  else {
     calib_step_ = Error;
-    ROS_WARN("LiDAR model %s not support yet.", lidar_model.c_str());
+    RCLCPP_WARN(rclcpp::get_logger("test"),"LiDAR model %s not support yet.", lidar_model.c_str());
+
   }
 
   segment_dataset_ =
@@ -140,12 +142,12 @@ bool LICalibrHelper::CheckCalibStep(CalibStep desired_step,
   static TicToc timer;
   static std::string last_func_name = "Start";
 
-  if (!ros::ok()) return false;
+  if (!rclcpp::ok()) return false;
 
   bool check_pass = true;
   if (calib_step_ != desired_step) {
     check_pass = false;
-    ROS_WARN("[%s] Need status: [%s].", func_name.c_str(),
+    RCLCPP_WARN(rclcpp::get_logger("test"),"[%s] Need status: [%s].", func_name.c_str(),
              step_descri[int(desired_step)].c_str());
   }
 
@@ -186,9 +188,9 @@ void LICalibrHelper::Initialization() {
     if (ret)
       calib_step_ = InitializationDone;
     else
-      ROS_WARN("[Initialization] fails.");
+      RCLCPP_WARN(rclcpp::get_logger("test"),"[Initialization] fails.");
   } else {
-    ROS_WARN("[Initialization] skip.");
+    RCLCPP_WARN(rclcpp::get_logger("test"),"[Initialization] skip.");
   }
 
   /// if initiailization fails, then use the prior
@@ -459,6 +461,7 @@ void LICalibrHelper::SavePointCloud() const {
       std::string map_path = cache_path_ + "/refined_map-iter" + suffix;
       pcl::io::savePCDFileBinaryCompressed(
           map_path, *(scan_undistortion_vec_.at(id)->get_map_cloud()));
+
       std::cout << "Save refined map to " << map_path << "; size: "
                 << scan_undistortion_vec_.at(id)->get_map_cloud()->size()
                 << std::endl;

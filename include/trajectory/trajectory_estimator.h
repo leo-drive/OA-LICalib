@@ -23,6 +23,7 @@
 #ifndef TRAJECTORY_ESTIMATOR_H
 #define TRAJECTORY_ESTIMATOR_H
 
+
 #include <ceres/ceres.h>
 #include <ceres/covariance.h>
 #include <factor/auto_diff/imu_factor.h>
