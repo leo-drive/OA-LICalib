@@ -31,18 +31,14 @@ namespace liso {
 
 class InertialInitializer
 {
-//class InertialInitializer {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   typedef std::shared_ptr<InertialInitializer> Ptr;
-  explicit InertialInitializer(const rclcpp::NodeOptions & options)      : rotaion_initialized_(false),
-                                                                           q_ItoS_est_(Eigen::Quaterniond::Identity()) {}
 
-
-//        explicit InertialInitializer()
-//      : rotaion_initialized_(false),
-//        q_ItoS_est_(Eigen::Quaterniond::Identity()) {}
+        explicit InertialInitializer()
+      : rotaion_initialized_(false),
+        q_ItoS_est_(Eigen::Quaterniond::Identity()) {}
 
   bool BuildProblem(std::shared_ptr<Trajectory> p_trajectory,
                     const Eigen::aligned_vector<OdomData>& odom_data,

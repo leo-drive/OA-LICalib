@@ -23,6 +23,8 @@
   <depend>rslidar_msgs</depend>
   <depend>std_msgs</depend>
  <depend>tf2_eigen</depend>
+ <depend>velodyne_msgs</depend>
+ <depend>rosbag2</depend>
 <!--  <build_depend>std_msgs</build_depend>-->
 <!--  <exec_depend>std_msgs</exec_depend>-->
   <build_depend>sensor_msgs</build_depend>

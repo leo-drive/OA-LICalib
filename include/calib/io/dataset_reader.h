@@ -24,7 +24,7 @@
 #define DATASET_READER_H
 
 /// read rosbag
-
+//#include <rosbag2/reader.hpp>
 //#include <rosbag/bag.h>
 //#include <rosbag/view.h>
 #include <boost/foreach.hpp>
@@ -64,7 +64,7 @@ inline bool loadmsg(const std::string bag_path, const std::string topic,
   std::vector<std::string> topics;
   topics.push_back(topic);
 
-  rosbag::View view_full;
+  rosbag2::View view_full;
   rosbag::View view;
 
   // Start a few seconds in from the full view time

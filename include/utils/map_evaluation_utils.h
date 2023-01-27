@@ -37,6 +37,7 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/search/kdtree.h>
 #include <pcl/segmentation/sac_segmentation.h>
+#iinclude <pcl/pcl_macros.h>
 
 /// Reference
 /// https://github.com/AIS-Bonn/pointcloud_evaluation_tool

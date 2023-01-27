@@ -24,28 +24,28 @@
 namespace liso {
 
 namespace publisher {
-rclcpp::Publisher pub_trajectory_raw_;
-rclcpp::Publisher pub_trajectory_est_;
-rclcpp::Publisher pub_imu_raw_array_;
-rclcpp::Publisher pub_imu_est_array_;
-rclcpp::Publisher pub_target_cloud_;
-rclcpp::Publisher pub_source_cloud_;
+rclcpp::Publisher<oa_licalib::msg::pose_array>::SharedPtr pub_trajectory_raw_;
+rclcpp::Publisher<oa_licalib::msg::pose_array>::SharedPtr pub_trajectory_est_;
+rclcpp::Publisher<oa_licalib::imu_array>::SharedPtr pub_imu_raw_array_;
+rclcpp::Publisher<oa_licalib::imu_array>::SharedPtr pub_imu_est_array_;
+rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_target_cloud_;
+rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_source_cloud_;
 
 rclcpp::Publisher pub_spline_trajectory_;
 rclcpp::Publisher pub_lidar_trajectory_;
 
-void SetPublisher(ros::NodeHandle &nh) {
+void SetPublisher(const rclcpp::NodeOptions & node_options) {
   /// Vicon data
-  pub_trajectory_raw_ = nh.advertise<oa_licalib::msg::pose_array>("/path_raw", 10);
-  pub_trajectory_est_ = nh.advertise<oa_licalib::pose_array>("/path_est", 10);
+  pub_trajectory_raw_ =  this->create_publisher<oa_licalib::msg::pose_array>("/path_raw", 10);
+  pub_trajectory_est_ =  this->create_publisher<oa_licalib::pose_array>("/path_est", 10);
   /// IMU fitting results
-  pub_imu_raw_array_ = nh.advertise<oa_licalib::imu_array>("/imu_raw_array", 10);
-  pub_imu_est_array_ = nh.advertise<oa_licalib::imu_array>("/imu_est_array", 10);
+  pub_imu_raw_array_ =  this->create_publisher<oa_licalib::imu_array>("/imu_raw_array", 10);
+  pub_imu_est_array_ =  this->create_publisher<oa_licalib::imu_array>("/imu_est_array", 10);
   /// lidar matching results
   pub_target_cloud_ =
-      nh.advertise<sensor_msgs::msg::PointCloud2>("/target_cloud", 10);
+          this->create_publisher<sensor_msgs::msg::PointCloud2>("/target_cloud", 10);
   pub_source_cloud_ =
-      nh.advertise<sensor_msgs::msg::PointCloud2>("/source_cloud", 10);
+          this->create_publisher<sensor_msgs::msg::PointCloud2>("/source_cloud", 10);
 
   /// spline trajectory
   pub_spline_trajectory_ =

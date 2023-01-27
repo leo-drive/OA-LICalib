@@ -24,13 +24,13 @@
 
 #include <angles/angles.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl_ros/point_cloud.h>
+//#include <pcl_ros/point_cloud.h>
 #include <rclcpp/rclcpp.hpp>
 #include <iostream>
 #include <vector>
 
 #include <sensor_data/lidar_feature.h>
-#include <sensor_msgs/msg/PointCloud2.hpp>
+#include <sensor_msgs/msg/point_cloud.hpp>
 
 namespace liso {
 
@@ -215,7 +215,8 @@ class VelodynePoints {
     RTPointCloud pc_in;
     pcl::fromROSMsg(*lidarMsg, pc_in);
 
-    double timebase = lidarMsg->header.stamp.toSec();
+    double timebase = lidarMsg->header.stamp.sec +
+                      lidarMsg->header.stamp.nanosec * 1e-9;
     output.timestamp = timebase;
 
     /// point cloud

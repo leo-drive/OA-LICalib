@@ -46,10 +46,10 @@ find_package(rclpy REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(angles REQUIRED)
-#find_package(message_generation REQUIRED)
+find_package(rosbag2 REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(pcl_ros REQUIRED)
-
+find_package(velodyne_msgs REQUIRED)
 find_package(PCL REQUIRED)
 
 find_package(sensor_msgs REQUIRED)
@@ -61,7 +61,7 @@ find_package(tf2_eigen REQUIRED)
 find_package(ndt_omp_ros2 REQUIRED)
 #find_package(roslib REQUIRED)
 find_package(Boost REQUIRED)
-
+find_package(angles REQUIRED)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -99,6 +99,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         tf2
         ndt_omp_ros2
         tf2_eigen
+        rosbag2
         )
 ament_export_dependencies(rosidl_default_runtime)
 ## Generate added messages and services with any dependencies listed here
@@ -165,6 +166,8 @@ ament_auto_add_library(lib_calib
 
 
 set (USED_LIBRARIES
+        velodyne_msgs
+        angles
         rclcpp
         rclpy
         geometry_msgs
@@ -177,6 +180,7 @@ set (USED_LIBRARIES
         tf2
         ndt_omp_ros2
         tf2_eigen
+        rosbag2
         ${thirdparty_libraries}
         )
 

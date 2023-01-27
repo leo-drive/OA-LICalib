@@ -24,11 +24,11 @@
 #define VELODYNE_CORRECTION_HPP
 
 #include <angles/angles.h>
-#include <pcl_ros/point_cloud.h>
-#include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <velodyne_msgs/VelodynePacket.h>
-#include <velodyne_msgs/VelodyneScan.h>
+//#include <pcl_ros/point_cloud.h>
+//#include <ros/ros.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
+#include <velodyne_msgs/msg/velodyne_scan.hpp>
 #include <iostream>
 #include <vector>
 
@@ -42,10 +42,11 @@ class Velodyne16 {
 
   Velodyne16() { setParameters(); }
 
-  void unpack_scan(const velodyne_msgs::VelodyneScan::ConstPtr &lidarMsg,
+  void unpack_scan(const velodyne_msgs::msg::VelodyneScan::ConstPtr &lidarMsg,
                    LiDARFeature &output) const {
     output.Clear();
-    output.timestamp = lidarMsg->header.stamp.toSec();
+    output.timestamp = lidarMsg->header.stamp.sec +
+                       lidarMsg->header.stamp.nanosec * 1e-9;
 
     /// point cloud
     output.full_features->height = 16;
@@ -62,7 +63,8 @@ class Velodyne16 {
 
     int block_counter = 0;
 
-    double scan_timestamp = lidarMsg->header.stamp.toSec();
+    double scan_timestamp = lidarMsg->header.stamp.sec +
+                            lidarMsg->header.stamp.nanosec * 1e-9;
 
     float deg2rad_resolution = ROTATION_RESOLUTION / 180.0 * M_PI;
 
@@ -172,12 +174,14 @@ class Velodyne16 {
     }
   }
 
-  void unpack_scan(const sensor_msgs::PointCloud2::ConstPtr &lidarMsg,
+  void unpack_scan(const sensor_msgs::msg::PointCloud2::ConstPtr &lidarMsg,
                    LiDARFeature &output) const {
     VPointCloud pc_in;
     pcl::fromROSMsg(*lidarMsg, pc_in);
 
-    double timebase = lidarMsg->header.stamp.toSec();
+
+    double timebase = lidarMsg->header.stamp.sec +
+                      lidarMsg->header.stamp.nanosec * 1e-9;
     output.timestamp = timebase;
 
     /// point cloud

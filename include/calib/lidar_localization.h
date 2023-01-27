@@ -37,7 +37,7 @@
 
 namespace liso {
 
-class LIDARLocalization  : public rclcpp::Node{
+class LIDARLocalization {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<LIDARLocalization> Ptr;

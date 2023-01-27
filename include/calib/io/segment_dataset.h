@@ -46,6 +46,7 @@ class SegmentDatasetManager {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+//  SegmentDatasetManager(const rclcpp::NodeOptions & options,const LidarModelType& lidar_model){
   SegmentDatasetManager(const YAML::Node& node,
                         const LidarModelType& lidar_model) {
     int segment_num = node["segment_num"].as<int>();
