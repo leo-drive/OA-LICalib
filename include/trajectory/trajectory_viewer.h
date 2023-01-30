@@ -25,14 +25,16 @@
 
 #include <sensor_data/imu_data.h>
 #include <trajectory/se3_trajectory.h>
-
-//#include <eigen_conversions/eigen_msg.h>
+#include <rclcpp/rclcpp.hpp>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2/tf2/convert.h>
 #include <tf2/convert.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include "oa_licalib/msg/imu_array.hpp"
-#include <oa_licalib/msg/pose_array.hpp>
-// include FeautureCloud.h
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include "oa_licalib_msgs/msg/pose_array.hpp"
+#include "oa_licalib_msgs/msg/imu_array.hpp"
+
 #include <nav_msgs/msg/path.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -42,29 +44,29 @@
 namespace liso {
 
 namespace publisher {
-extern rclcpp::Publisher<oa_licalib::msg::poseArray>::SharedPtr pub_trajectory_raw_;
-extern rclcpp::Publisher<oa_licalib::pose_array>::SharedPtr pub_trajectory_est_;
-extern rclcpp::Publisher<oa_licalib::imu_array>::SharedPtr pub_imu_raw_array_;
-extern rclcpp::Publisher<oa_licalib::imu_array>::SharedPtr pub_imu_est_array_;
+extern rclcpp::Publisher<oa_licalib_msgs::msg::PoseArray>::SharedPtr pub_trajectory_raw_;
+extern rclcpp::Publisher<oa_licalib_msgs::msg::PoseArray>::SharedPtr pub_trajectory_est_;
+extern rclcpp::Publisher<oa_licalib_msgs::msg::ImuArray>::SharedPtr pub_imu_raw_array_;
+extern rclcpp::Publisher<oa_licalib_msgs::msg::ImuArray>::SharedPtr pub_imu_est_array_;
 extern rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_target_cloud_;
 extern rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_source_cloud_;
 
 extern rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pub_spline_trajectory_;
 extern rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pub_lidar_trajectory_;
 
-void SetPublisher(ros::NodeHandle &nh);
+//void SetPublisher(rclcpp::Node::SharedPtr &node);
 
 };  // namespace publisher
 
 namespace TrajectoryViewer {
 inline void PublishIMUData(std::shared_ptr<Trajectory> trajectory,
                            const Eigen::aligned_vector<IMUData> &imu_data) {
-  if (publisher::pub_imu_raw_array_.getNumSubscribers() == 0 &&
-      publisher::pub_imu_est_array_.getNumSubscribers() == 0)
+  if (publisher::pub_imu_raw_array_->get_subscription_count() == 0 &&
+      publisher::pub_imu_est_array_->get_subscription_count() == 0)
     return;
 
-  oa_licalib::imu_array imu_array_raw;
-  oa_licalib::imu_array imu_array_est;
+  oa_licalib_msgs::msg::ImuArray imu_array_raw;
+  oa_licalib_msgs::msg::ImuArray imu_array_est;
 
   for (auto const &v : imu_data) {
     if (!trajectory->GetTrajQuality(v.timestamp)) {
@@ -96,24 +98,24 @@ inline void PublishIMUData(std::shared_ptr<Trajectory> trajectory,
     imu_array_est.angular_velocities.push_back(gyro2);
     imu_array_est.linear_accelerations.push_back(accel2);
   }
-  imu_array_raw.header.stamp = ros::Time::now();
+  imu_array_raw.header.stamp = rclcpp::Clock().now();
   imu_array_raw.header.frame_id = "/imu";
 
   imu_array_est.header = imu_array_raw.header;
 
-  publisher::pub_imu_raw_array_.publish(imu_array_raw);
-  publisher::pub_imu_est_array_.publish(imu_array_est);
+  publisher::pub_imu_raw_array_->publish(imu_array_raw);
+  publisher::pub_imu_est_array_->publish(imu_array_est);
 }
 
 inline void PublishViconData(
     std::shared_ptr<Trajectory> trajectory,
     const Eigen::aligned_vector<PoseData> &vicon_data) {
-  if (publisher::pub_trajectory_raw_.getNumSubscribers() == 0 &&
-      publisher::pub_trajectory_est_.getNumSubscribers() == 0)
+  if (publisher::pub_trajectory_raw_->get_subscription_count()== 0 &&
+      publisher::pub_trajectory_est_->get_subscription_count() == 0)
     return;
 
-  oa_licalib::pose_array vicon_path_raw;
-  oa_licalib::pose_array vicon_path_est;
+  oa_licalib_msgs::msg::PoseArray vicon_path_raw;
+  oa_licalib_msgs::msg::PoseArray vicon_path_est;
 
   for (auto const &v : vicon_data) {
     geometry_msgs::msg::Vector3 position;
@@ -141,22 +143,22 @@ inline void PublishViconData(
   }
 
   vicon_path_raw.header.frame_id = "/map";
-  vicon_path_raw.header.stamp = ros::Time::now();
+  vicon_path_raw.header.stamp = rclcpp::Clock().now();
   vicon_path_est.header = vicon_path_raw.header;
 
-  publisher::pub_trajectory_raw_.publish(vicon_path_raw);
-  publisher::pub_trajectory_est_.publish(vicon_path_est);
+  publisher::pub_trajectory_raw_->publish(vicon_path_raw);
+  publisher::pub_trajectory_est_->publish(vicon_path_est);
 }
 
 inline void PublishViconData(
     const Eigen::aligned_vector<PoseData> &vicon_est,
     const Eigen::aligned_vector<PoseData> &vicon_data) {
-  if (publisher::pub_trajectory_raw_.getNumSubscribers() == 0 &&
-      publisher::pub_trajectory_est_.getNumSubscribers() == 0)
+  if (publisher::pub_trajectory_raw_->get_subscription_count() == 0 &&
+      publisher::pub_trajectory_est_->get_subscription_count() == 0)
     return;
 
-  oa_licalib::pose_array vicon_path_raw;
-  oa_licalib::pose_array vicon_path_est;
+  oa_licalib_msgs::msg::PoseArray vicon_path_raw;
+  oa_licalib_msgs::msg::PoseArray vicon_path_est;
 
   for (auto const &v : vicon_data) {
     geometry_msgs::msg::Vector3 position;
@@ -192,15 +194,15 @@ inline void PublishViconData(
   vicon_path_raw.header.stamp = rclcpp::Clock().now();
   vicon_path_est.header = vicon_path_raw.header;
 
-  publisher::pub_trajectory_raw_.publish(vicon_path_raw);
-  publisher::pub_trajectory_est_.publish(vicon_path_est);
+  publisher::pub_trajectory_raw_->publish(vicon_path_raw);
+  publisher::pub_trajectory_est_->publish(vicon_path_est);
 }
 
 inline void PublishIMUOrientationData(
     std::shared_ptr<Trajectory> trajectory,
     const Eigen::aligned_vector<PoseData> &orientation_data) {
-  oa_licalib::pose_array imu_ori_path_raw;
-  oa_licalib::pose_array imu_ori_path_est;
+  oa_licalib_msgs::msg::PoseArray imu_ori_path_raw;
+  oa_licalib_msgs::msg::PoseArray imu_ori_path_est;
 
   for (auto const &v : orientation_data) {
     geometry_msgs::msg::Vector3 position;
@@ -228,11 +230,11 @@ inline void PublishIMUOrientationData(
   }
 
   imu_ori_path_raw.header.frame_id = "/map";
-  imu_ori_path_raw.header.stamp = rclcpp::Clock.now();
+  imu_ori_path_raw.header.stamp = rclcpp::Clock().now();
   imu_ori_path_est.header = imu_ori_path_raw.header;
 
-  publisher::pub_trajectory_raw_.publish(imu_ori_path_raw);
-  publisher::pub_trajectory_est_.publish(imu_ori_path_est);
+  publisher::pub_trajectory_raw_->publish(imu_ori_path_raw);
+  publisher::pub_trajectory_est_->publish(imu_ori_path_est);
 }
 
 inline void PublishLoamCorrespondence(
@@ -287,7 +289,7 @@ inline void PublishLoamCorrespondence(
   pcl::toROSMsg(target_cloud, target_msg);
   pcl::toROSMsg(source_cloud, source_msg);
 
-  target_msg.header.stamp = rclcpp::Clock.now();
+  target_msg.header.stamp = rclcpp::Clock().now();
   target_msg.header.frame_id = "/map";
   source_msg.header = target_msg.header;
 
@@ -301,7 +303,7 @@ inline void PublishSplineTrajectory(std::shared_ptr<Trajectory> trajectory,
   if (min_time < trajectory->minTime()) min_time = trajectory->minTime();
   if (max_time > trajectory->maxTime()) max_time = trajectory->maxTime();
 
-  if (publisher::pub_spline_trajectory_.getNumSubscribers() != 0) {
+  if (publisher::pub_spline_trajectory_->get_subscription_count() != 0) {
     rclcpp::Time t_temp;
     std::vector<geometry_msgs::msg::PoseStamped> poses_geo;
     for (double t = min_time; t < max_time; t += dt) {
@@ -316,16 +318,16 @@ inline void PublishSplineTrajectory(std::shared_ptr<Trajectory> trajectory,
       poseIinG.pose.orientation = tf2::toMsg(pose.unit_quaternion());
       poses_geo.push_back(poseIinG);
     }
-    rclcpp::Time time_now = rclcpp::Clock.now();
+    rclcpp::Time time_now = rclcpp::Clock().now();
     nav_msgs::msg::Path traj_path;
     traj_path.header.stamp = time_now;
     traj_path.header.frame_id = "/map";
     traj_path.poses = poses_geo;
 
-    publisher::pub_spline_trajectory_.publish(traj_path);
+    publisher::pub_spline_trajectory_->publish(traj_path);
   }
 
-  if (publisher::pub_lidar_trajectory_.getNumSubscribers() != 0) {
+  if (publisher::pub_lidar_trajectory_->get_subscription_count() != 0) {
     rclcpp::Time t_temp;
 
     std::vector<geometry_msgs::msg::PoseStamped> poses_geo;
@@ -349,11 +351,75 @@ inline void PublishSplineTrajectory(std::shared_ptr<Trajectory> trajectory,
     traj_path.header.frame_id = "/map";
     traj_path.poses = poses_geo;
 
-    publisher::pub_lidar_trajectory_.publish(traj_path);
+    publisher::pub_lidar_trajectory_->publish(traj_path);
   }
 }
 }  // namespace TrajectoryViewer
 
+
 }  // namespace liso
+
+
+
+
+class LICalibNode : public rclcpp::Node {
+public:
+    LICalibNode() : Node("li_calib_node") {
+
+
+        rclcpp::Publisher<oa_licalib_msgs::msg::PoseArray>::SharedPtr pub_trajectory_raw_;
+        rclcpp::Publisher<oa_licalib_msgs::msg::PoseArray>::SharedPtr pub_trajectory_est_;
+        rclcpp::Publisher<oa_licalib_msgs::msg::ImuArray>::SharedPtr pub_imu_raw_array_;
+        rclcpp::Publisher<oa_licalib_msgs::msg::ImuArray>::SharedPtr pub_imu_est_array_;
+        rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_target_cloud_;
+        rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_source_cloud_;
+
+        rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pub_spline_trajectory_;
+        rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pub_lidar_trajectory_;
+
+
+        /// Vicon data
+        pub_trajectory_raw_ = this->create_publisher<oa_licalib_msgs::msg::PoseArray>("/path_raw", 10);
+        pub_trajectory_est_ = this->create_publisher<oa_licalib_msgs::msg::PoseArray>("/path_est", 10);
+        /// IMU fitting results
+        pub_imu_raw_array_ = this->create_publisher<oa_licalib_msgs::msg::ImuArray>("/imu_raw_array", 10);
+        pub_imu_est_array_ = this->create_publisher<oa_licalib_msgs::msg::ImuArray>("/imu_est_array", 10);
+        /// lidar matching results
+        pub_target_cloud_ =
+                this->create_publisher<sensor_msgs::msg::PointCloud2>("/target_cloud", 10);
+        pub_source_cloud_ =
+                this->create_publisher<sensor_msgs::msg::PointCloud2>("/source_cloud", 10);
+
+        /// spline trajectory
+        pub_spline_trajectory_ =
+                this->create_publisher<nav_msgs::msg::Path>("/spline_trajectory", 10);
+
+        /// spline trajectory
+        pub_lidar_trajectory_ = this->create_publisher<nav_msgs::msg::Path>("/lidar_trajectory", 10);
+
+//        liso::publisher::SetPublisher(rclcpp::Node::SharedPtr Node);
+
+
+        std::string config_path;
+//        nh.param<std::string>("config_path", config_path, "/config/li-calib.yaml");
+        config_path = this->declare_parameter<std::string>("config_path", "/config/li-calib.yaml");
+
+        std::string package_name = "oa_licalib";
+        std::string PACKAGE_PATH = ament_index_cpp::get_package_share_directory(package_name);
+
+        std::string config_file_path = PACKAGE_PATH + config_path;
+        YAML::Node config_node = YAML::LoadFile(config_file_path);
+
+        CalibUI calib_ui(config_node);
+
+        bool use_gui = config_node["use_gui"].as<bool>();
+        if (use_gui) {
+            calib_ui.InitGui();
+            calib_ui.RenderingLoop();
+        } else {
+            // calib_ui.Run();
+            calib_ui.RunSimulation();
+        }
+    }
 
 #endif

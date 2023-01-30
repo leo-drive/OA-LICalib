@@ -37,12 +37,13 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/search/kdtree.h>
 #include <pcl/segmentation/sac_segmentation.h>
-#iinclude <pcl/pcl_macros.h>
+#include <pcl/pcl_macros.h>
+#include <rclcpp/rclcpp.hpp>
 
 /// Reference
 /// https://github.com/AIS-Bonn/pointcloud_evaluation_tool
 /// http://www.ais.uni-bonn.de/papers/ECMR_2015_Razlaw.pdf
-
+using namespace std;
 struct PointTypeWithEntropy {
   PCL_ADD_POINT4D;  // preferred way of adding a XYZ + padding
   float entropy;
@@ -56,16 +57,22 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(
                                             entropy)(float, planeVariance,
                                                      planeVariance))
 
-class MapEvaluationTool {
+class MapEvaluationTool : public rclcpp::Node {
  public:
-  MapEvaluationTool(std::string map_path, int step_size = 1,
-                    double radius = 0.3, int min_neighbors = 15,
-                    bool punish_solitary_points = false)
-      : map_path_(map_path),
-        step_size_(step_size),
-        radius_(radius),
-        min_neighbors_(min_neighbors),
-        punish_solitary_points_(punish_solitary_points) {}
+  MapEvaluationTool() : Node("map_evaluation_tool") {
+
+    std::string map_path_;
+    int step_size;
+    double radius;
+    bool punish_solitar_points;
+    int min_neighbors;
+
+    map_path_ = this->declare_parameter<std::string>("map_path", " ");
+    step_size = this->declare_parameter("step_size", 1);
+    radius = this->declare_parameter("radius", 0.3);
+    min_neighbors = this->declare_parameter("min_neighbors", 15);
+    punish_solitar_points = this->declare_parameter("punish_solitar_points", false);
+
 
   double ComputeEntropy(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud) {
     Eigen::Vector4f centroid;

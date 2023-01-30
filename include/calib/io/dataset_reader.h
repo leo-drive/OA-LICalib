@@ -24,10 +24,16 @@
 #define DATASET_READER_H
 
 /// read rosbag
-//#include <rosbag2/reader.hpp>
-//#include <rosbag/bag.h>
-//#include <rosbag/view.h>
+#include <rosbag2_cpp/rosbag2_cpp/reader.hpp>
+#include <rosbag2_cpp/rosbag2_cpp/bag_events.hpp>
+#include <rosbag2_cpp/rosbag2_cpp/readers/sequential_reader.hpp>
+#include <rosbag2_cpp/rosbag2_cpp/reader.hpp>
+#include <rosbag2_storage/rosbag2_storage/storage_options.hpp>
+#include <rosbag2_cpp/rosbag2_cpp/converter_interfaces/serialization_format_converter.hpp>
+#include <rosbag2_cpp/rosbag2_cpp/converter_options.hpp>
 #include <boost/foreach.hpp>
+
+// include TopicQuery
 #define foreach BOOST_FOREACH
 /// ros message
 #include <geometry_msgs/msg/transform_stamped.h>
@@ -50,7 +56,7 @@
 #include <Eigen/Core>
 #include <fstream>
 #include <random>
-
+#include <time.h>
 namespace liso {
 
 namespace IO {
@@ -59,22 +65,47 @@ template <typename MsgType, typename MsgTypePtr>
 inline bool loadmsg(const std::string bag_path, const std::string topic,
                     std::vector<MsgTypePtr> &msgs, const double bag_start = 0,
                     const double bag_durr = -1) {
-  rosbag::Bag bag;
-  bag.open(bag_path, rosbag::bagmode::Read);
+
+
+    rosbag2_storage::StorageOptions storage_options{};
+
+//    auto file_path = ament_index_cpp::get_package_share_directory("test")
+//                     + "/data/rosbag_autoware_receiver_0.db3";
+    storage_options.uri = bag_path;
+    storage_options.storage_id = "sqlite3";
+
+    rosbag2_cpp::ConverterOptions converter_options{};
+    converter_options.input_serialization_format = "cdr";
+    converter_options.output_serialization_format = "cdr";
+
+
+//    rosbag2_cpp::readers::SequentialReader reader;
+//    reader.open(storage_options, converter_options);
+
+//read rosbag
+//    rosbag2_cpp::bag_events::BagEvent bag;
+//    bag.open(storage_options, rosbag2_cpp::bag_events::bag_mode::Read);
+  //open the bag
+//  rosbag2_cpp::readers::SequentialReader reader;
+//  bag.open(bag_path, rosbag2_cpp::reader::Read);
+
   std::vector<std::string> topics;
   topics.push_back(topic);
 
-  rosbag2::View view_full;
+  rosbag2_cpp::View view_full;
   rosbag::View view;
 
   // Start a few seconds in from the full view time
   // If we have a negative duration then use the full bag length
   view_full.addQuery(bag);
   rclcpp::Time time_init = view_full.getBeginTime();
-  time_init += rclcpp::Duration(bag_start);
+  time_init += rclcpp::Duration::from_seconds(bag_start);
+
   rclcpp::Time time_finish = (bag_durr < 0) ? view_full.getEndTime()
-                                         : time_init + ros::Duration(bag_durr);
-  view.addQuery(bag, rosbag::TopicQuery(topics), time_init, time_finish);
+                                         : time_init + rclcpp::Duration::from_seconds(bag_durr);
+  view.addQuery(bag, rosbag2_storage::TopicQuery(topics), time_init, time_finish);
+//set topic query
+
 
   // Check to make sure we have data to play
   if (view.size() == 0) {
@@ -84,7 +115,7 @@ inline bool loadmsg(const std::string bag_path, const std::string topic,
   }
 
   // Step through the rosbag
-  for (const rosbag::MessageInstance &m : view) {
+  for (const rosbag2_cpp::MessageInstance &m : view) {
     // Handle IMU measurement
     MsgTypePtr msgPtr = m.instantiate<MsgType>();
     if (msgPtr != NULL) {
@@ -391,7 +422,7 @@ class LioDataset {
   const std::vector<LiDARFeature> &get_scan_data() const { return scan_data_; }
 
  public:
-  std::shared_ptr<rosbag::Bag> bag_;
+  std::shared_ptr<ros2bag::Bag> bag_;
 
   Eigen::aligned_vector<IMUData> imu_data_;
 

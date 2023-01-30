@@ -22,7 +22,6 @@
 
 #include <calib/calib_helper.h>
 #include <pangolin/pangolin.h>
-//#include <ros/package.h>
 #include <rclcpp/rclcpp.hpp>
 #include <trajectory/trajectory_viewer.h>
 #include <string>
@@ -226,28 +225,15 @@ class CalibUI : public LICalibrHelper {
 };
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "li_calib_node");
-  ros::NodeHandle nh("~");
+//  ros::init(argc, argv, "li_calib_node");
+//  ros::NodeHandle nh("~");
 
-  liso::publisher::SetPublisher(nh);
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<LICalibNode>();
 
-  std::string config_path;
-  nh.param<std::string>("config_path", config_path, "/config/li-calib.yaml");
+    rclcpp::spin(node);
+    rclcpp::shutdown();
 
-  std::string package_name = "oa_licalib";
-  std::string PACKAGE_PATH = ros::package::getPath(package_name);
 
-  std::string config_file_path = PACKAGE_PATH + config_path;
-  YAML::Node config_node = YAML::LoadFile(config_file_path);
 
-  CalibUI calib_ui(config_node);
-
-  bool use_gui = config_node["use_gui"].as<bool>();
-  if (use_gui) {
-    calib_ui.InitGui();
-    calib_ui.RenderingLoop();
-  } else {
-    // calib_ui.Run();
-    calib_ui.RunSimulation();
-  }
 }

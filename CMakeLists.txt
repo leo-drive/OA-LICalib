@@ -51,7 +51,6 @@ find_package(pcl_conversions REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
 find_package(PCL REQUIRED)
-
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -64,60 +63,18 @@ find_package(Boost REQUIRED)
 find_package(angles REQUIRED)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+find_package(rosidl_default_generators REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(oa_licalib_msgs REQUIRED)
 
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
-#include_directories(${YAML_CPP_INCLUDEDIR})
 find_package(yaml-cpp REQUIRED)
 include_directories(${YAML_INCLUDE_DIRS})
 
 set(PANGOLIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/build-pangolin")
 find_package(Pangolin REQUIRED)
 
-## Generate messages in the 'msg' folder
-set(msg_files
-        "msg/FeatureCloud.msg"
-        "msg/ImuArray.msg"
-        "msg/PoseArray.msg"
-        )
-set(sensor_msgs
-        geometry_msgs
-        std_msgs)
-rosidl_generate_interfaces(${PROJECT_NAME}
-        ${msg_files}
-        DEPENDENCIES
-        ${msg_dependencies}
-        rclcpp
-        rclpy
-        geometry_msgs
-        nav_msgs
-        pcl_conversions
-        pcl_ros
-        PCL
-        sensor_msgs
-        std_msgs
-        tf2
-        ndt_omp_ros2
-        tf2_eigen
-        rosbag2
-        )
-ament_export_dependencies(rosidl_default_runtime)
-## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  std_msgs  # Or other packages containing msgs
-#  sensor_msgs
-#)
 
-#catkin_package(
-#  INCLUDE_DIRS include
-#  CATKIN_DEPENDS std_msgs sensor_msgs
-##  LIBRARIES spline_test
-##  CATKIN_DEPENDS other_catkin_pkg
-##  DEPENDS system_lib
-#)
 include_directories(
-        #${catkin_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}/include/
         ${PROJECT_SOURCE_DIR}/thirdparty/
         sensor_msgs
@@ -141,34 +98,30 @@ include_directories(thirdparty/Sophus)
 # Set link libraries used by all binaries
 set(thirdparty_libraries
         Boost
-#        ${catkin_LIBRARIES}
-#        ${PCL_LIBRARIES}
         PCL
         OpenCV
-#        ${OpenCV_LIBS}
         ${YAML_CPP_LIBRARIES}
         Pangolin
-#        ${Pangolin_LIBRARIES}
         Ceres
         )
 
 ################ Library #######################
-ament_auto_add_library(lib_calib
-        src/trajectory/se3_trajectory.cpp
-        src/trajectory/trajectory_estimator.cpp
-        src/trajectory/trajectory_viewer.cpp
-        src/calib/lidar_localization.cpp
-        src/calib/lidar_ndt_odometry.cpp
-        src/calib/surfel_association.cpp
-        src/calib/inertial_initializer.cpp
-        src/calib/scan_undistortion.cpp
-        )
+#ament_auto_add_library(lib_calib
+#        "src/trajectory/se3_trajectory.cpp"
+#        "src/trajectory/trajectory_estimator.cpp"
+#        "src/trajectory/trajectory_viewer.cpp"
+#        "src/calib/lidar_localization.cpp"
+#        "src/calib/lidar_ndt_odometry.cpp"
+#        "src/calib/surfel_association.cpp"
+#        "src/calib/inertial_initializer.cpp"
+#        "src/calib/scan_undistortion.cpp"
+#        )
 
 
 set (USED_LIBRARIES
+        rclcpp
         velodyne_msgs
         angles
-        rclcpp
         rclpy
         geometry_msgs
         nav_msgs
@@ -182,12 +135,13 @@ set (USED_LIBRARIES
         tf2_eigen
         rosbag2
         ${thirdparty_libraries}
+        oa_licalib_msgs
         )
-
-#ament_target_dependencies(lib_calib ${USED_LIBRARIES})
+add_executable(lib_calib src/trajectory/se3_trajectory.cpp src/trajectory/trajectory_estimator.cpp src/trajectory/trajectory_viewer.cpp src/calib/lidar_localization.cpp src/calib/lidar_ndt_odometry.cpp src/calib/surfel_association.cpp src/calib/inertial_initializer.cpp src/calib/scan_undistortion.cpp)
+ament_target_dependencies(lib_calib ${USED_LIBRARIES})
 target_link_libraries(lib_calib ${USED_LIBRARIES})
 target_compile_options(lib_calib PRIVATE -Wall -Wextra)
-add_dependencies(lib_calib  ${PROJECT_NAME})
+#add_dependencies(lib_calib  ${PROJECT_NAME})
 ################# Node ###################
 
 add_executable(li_calib_node src/app/li_calib_node.cpp src/calib/calib_helper.cpp)
@@ -220,5 +174,4 @@ ament_export_dependencies(
 ament_export_include_directories(
         include
 )
-
 ament_package()

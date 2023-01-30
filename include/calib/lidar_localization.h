@@ -37,7 +37,7 @@
 
 namespace liso {
 
-class LIDARLocalization {
+class LIDARLocalization : public rclcpp::Node  {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   typedef std::shared_ptr<LIDARLocalization> Ptr;
@@ -45,7 +45,10 @@ class LIDARLocalization {
   explicit LIDARLocalization(
       double ndt_resolution = 0.5, double ndt_key_frame_downsample = 0.1,
       double map_downsample_size = 0.5,
-      const Eigen::Matrix4d init_pose = Eigen::Matrix4d::Identity());
+      const Eigen::Matrix4d init_pose = Eigen::Matrix4d::Identity()) : Node("LIDARLocalization"){
+
+
+  }
 
   void FeedScan(
       const LiDARFeature& cur_scan,
