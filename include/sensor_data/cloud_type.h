@@ -71,6 +71,16 @@ struct PointXYZIT {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 
+// Livox HAP
+struct PointXYZITLT {
+    PCL_ADD_POINT4D
+    float intensity;
+    uint8_t tag;        /**< Livox point tag   */
+    uint8_t line;
+    double timestamp;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
+
 POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pcl::PointXYZIRT,     //
                                   (float, x, x)                  //
                                   (float, y, y)                  //
@@ -103,6 +113,15 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZIT,
                                   (double, timestamp, timestamp)
                                   (uint16_t, ring, ring))
 
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZITLT,
+                                  (float, x, x)
+                                  (float, y, y)
+                                  (float, z, z)
+                                  (float, intensity, intensity)
+                                  (uint8_t, tag, tag)
+                                  (uint8_t, line, line)
+                                  (double, timestamp, timestamp))
+
 typedef velodyne_pcl::PointXYZIRT RTPoint;
 typedef pcl::PointCloud<RTPoint> RTPointCloud;
 
@@ -117,3 +136,6 @@ typedef pcl::PointCloud<ColorPoint> ColorPointCloud;
 
 typedef PointXYZIT HesaiPoint;
 typedef pcl::PointCloud<HesaiPoint> HesaiPointCloud;
+
+typedef PointXYZITLT LivoxPoint;
+typedef pcl::PointCloud<LivoxPoint> LivoxPointCloud;

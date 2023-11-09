@@ -51,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
     eigen_conversions
     tf_conversions
     ndt_omp
+    rslidar_msgs
     roslib
 )
 

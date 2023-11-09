@@ -108,6 +108,8 @@ void LICalibrHelper::LoadDataset(const YAML::Node& node) {
       lidar_model_type = LidarModelType::HESAI_XT32;
   } else if (lidar_model == "RS_16") {
     lidar_model_type = LidarModelType::RS_16;
+  } else if (lidar_model == "LIVOX_HAP") {
+    lidar_model_type = LidarModelType::LIVOX_HAP;
   } else {
     calib_step_ = Error;
     ROS_WARN("LiDAR model %s not support yet.", lidar_model.c_str());
