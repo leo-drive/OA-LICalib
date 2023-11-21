@@ -42,6 +42,7 @@ enum LidarModelType {
   Ouster_128_points,
   HESAI_XT32,
   LIVOX_HORIZON,
+  LIVOX_HAP,
   RS_16,
   RS_M1,
 };

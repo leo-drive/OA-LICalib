@@ -1,0 +1,56 @@
+# bag
+topic_lidar: /sensing/lidar/front/livox/points # /velodyne_packets #
+topic_imu: /sensing/combination_navigation/chc/imu
+
+LidarModel: LIVOX_HAP
+vlp16_ring_case: 0
+
+scan4map: 15.0
+ndtResolution: 1.0 # 0.5 for indoor case and 1.0 for outdoor case
+ndt_key_frame_downsample: 0.05
+map_downsample_size: 0.25
+
+knot_distance: 0.02
+
+use_gui: false
+
+# 当 segment_num = 1时，即用一段数据标定
+segment_num: 1
+selected_segment:
+  - {start_time: 15, end_time: 30, path_bag: /root/calib_ws/rosbag/ros1-robobus-1.bag}
+
+
+# If you select false, it calculate initial rotations.
+# If you know the approximate conversion between the sensors, set true.
+plane_motion: true
+
+# optimization weight
+gyro_weight: 2.80
+accel_weight: 1.85
+lidar_weight: 1.0
+
+lock_accel_bias: false
+
+opt_timeoffset: true
+timeoffset_padding: 0.01
+
+opt_lidar_intrinsic: false
+opt_IMU_intrinsic: true
+
+iteration_num: 14
+
+# For CalibParamManager
+extrinsic:
+  Trans: [3.5, -0.18, 0.0]
+  Trans_prior: [3.5, 0.0, 0.0]
+
+  Rot: [1, 0, 0,
+       0, 1, 0,
+       0, 0, 1]
+
+  # Trans: [0.3, 0.15, 0.05]
+
+  # gt [1, 2, 5]deg
+  # Rot: [  0.995588, -0.0871026,  0.0348995,
+  #       0.0877492,    0.99599, -0.0174418,
+  #     -0.0332403,  0.0204272,   0.999239]

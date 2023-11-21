@@ -238,7 +238,8 @@ int main(int argc, char** argv) {
   std::string PACKAGE_PATH = ros::package::getPath(package_name);
 
   std::string config_file_path = PACKAGE_PATH + config_path;
-  YAML::Node config_node = YAML::LoadFile(config_file_path);
+  // YAML::Node config_node = YAML::LoadFile(config_file_path);
+  YAML::Node config_node = YAML::LoadFile(config_path);
 
   CalibUI calib_ui(config_node);
 

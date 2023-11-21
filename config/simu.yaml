@@ -17,11 +17,10 @@ use_gui: false
 # 当 segment_num = 1时，即用一段数据标定
 segment_num: 1
 selected_segment:
-  - {start_time: 0, end_time: 7, path_bag: /home/ha/catkin_oa_calib/src/OA-LICalib/data/bag/simu_bag.bag}
+  - {start_time: 0, end_time: 7, path_bag: /root/calib_ws/src/OA-LICalib/data/bag/simu_bag.bag}
 
 
-# If you select false, it calculate initial rotations.
-# If you know the approximate conversion between the sensors, set true.
+# 平面运动时，旋转外参无法初始化
 plane_motion: false
 
 # optimization weight

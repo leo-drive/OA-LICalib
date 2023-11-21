@@ -51,6 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
     eigen_conversions
     tf_conversions
     ndt_omp
+    rslidar_msgs
     roslib
 )
 
@@ -137,3 +138,14 @@ add_dependencies(li_calib_node  ${PROJECT_NAME}_generate_messages_cpp)
 add_executable(map_evaluation_tools src/app/map_evaluation_tools.cpp)
 target_link_libraries(map_evaluation_tools ${thirdparty_libraries})
 
+install(TARGETS li_calib_node map_evaluation_tools lib_calib
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY
+  launch
+  config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

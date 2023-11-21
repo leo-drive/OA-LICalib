@@ -44,6 +44,7 @@
 #include <sensor_data/lidar_vlp_16.h>
 #include <sensor_data/lidar_vlp_points.h>
 #include <sensor_data/lidar_hesai.h>
+#include <sensor_data/lidar_livox.h>
 
 #include <utils/math_utils.h>
 #include <utils/eigen_utils.hpp>
@@ -111,6 +112,7 @@ class LioDataset {
     vlp_point_convert_ = nullptr;
     p_robosense_convert_ = nullptr;
     hesai_convert_ = nullptr;
+    livox_convert_ = nullptr;
 
     if (lidar_model_ == VLP_16_packet || lidar_model_ == VLP_16_SIMU) {
       velodyne16_convert_ = std::make_shared<Velodyne16>();
@@ -146,6 +148,9 @@ class LioDataset {
     else if (lidar_model_ == HESAI_XT32) {
         hesai_convert_ = std::make_shared<HesaiLiDAR>(HesaiRingNo::XT32);
 
+    }
+    else if (lidar_model_ == LIVOX_HAP) {
+      livox_convert_ = std::make_shared<LivoxLiDAR>(LivoxRingNo::HAP);
     }
     else if (lidar_model_ == RS_16) {
       p_robosense_convert_ = std::make_shared<RobosenseCorrection>(
@@ -234,6 +239,17 @@ class LioDataset {
             timestamp = scan_msg->header.stamp.toSec();
             hesai_convert_->get_organized_and_raw_cloud(scan_msg,
                                                         lidar_feature);
+            std::cout << "points read" << std::endl;
+                                                      
+        }
+        else if (lidar_model_ == LIVOX_HAP) {
+          sensor_msgs::PointCloud2::ConstPtr scan_msg =
+                    m.instantiate<sensor_msgs::PointCloud2>();
+          timestamp = scan_msg->header.stamp.toSec();
+          std::cout << "reading points" << std::endl;
+          livox_convert_->get_organized_and_raw_cloud(scan_msg,
+                                                      lidar_feature);
+          std::cout << "points read" << std::endl;
         }
         else if (lidar_model_ == Ouster) {
           sensor_msgs::PointCloud2::ConstPtr scan_msg =
@@ -426,6 +442,7 @@ class LioDataset {
   OusterLiDAR::Ptr ouster_convert_;
   RobosenseCorrection::Ptr p_robosense_convert_;
   HesaiLiDAR::Ptr hesai_convert_;
+  LivoxLiDAR::Ptr livox_convert_;
 
   LidarModelType lidar_model_;
 };

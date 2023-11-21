@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-   <arg name="config_path"    default="/config/sim.yaml" />
+   <arg name="config_path"    default="$(find oa_licalib)/config/ouster.yaml" />
 
   <node pkg="oa_licalib" type="li_calib_node" name="li_calib_node_batch" output="screen">
     <!-- <node pkg="oa_licalib" type="li_calib_node" name="li_calib_node" output="screen"
