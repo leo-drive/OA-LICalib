@@ -51,8 +51,10 @@ class OusterLiDAR {
   void get_organized_and_raw_cloud(
       const sensor_msgs::PointCloud2::ConstPtr &lidarMsg,
       LiDARFeature &output) {
+    sensor_msgs::PointCloud2 point_in = *lidarMsg;
+    point_in.is_dense = true;
     OusterPointCloud pc_in;
-    pcl::fromROSMsg(*lidarMsg, pc_in);
+    pcl::fromROSMsg(point_in, pc_in);
 
     int ring_number = int(ouster_ring_No_);
     int ring_step = pc_in.height / ring_number;
@@ -66,14 +68,16 @@ class OusterLiDAR {
     output.full_features->clear();
     output.full_features->height = ring_number;
     output.full_features->width = num_firing_;
-    output.full_features->is_dense = false;
+    output.full_features->is_dense = true;
+    std::cout << "got size 1" << std::endl;
     output.full_features->resize(output.full_features->height *
                                  output.full_features->width);
 
     /// raw_data
     output.raw_data->height = ring_number;
     output.raw_data->width = num_firing_;
-    output.raw_data->is_dense = false;
+    output.raw_data->is_dense = true;
+    std::cout << "got size 2" << std::endl;
     output.raw_data->resize(output.raw_data->height * output.raw_data->width);
 
     PosPoint NanPoint;
@@ -87,11 +91,12 @@ class OusterLiDAR {
       output.full_features->points[k] = NanPoint;
       output.raw_data->points[k] = NanPoint;
     }
+    std::cout << "got size 3" << std::endl;
 
     for (int h = 0; h < ring_number; h++) {
       int h_in_selected = h * ring_step;
       for (int w = 0; w < num_firing_; w++) {
-        const auto &src = pc_in.at(w, h_in_selected);
+        const auto &src = pc_in.at(h*num_firing_+w);
 
         // std::cout << w << "," << h << "," << src.x << "," << src.y
         //           << "," << src.z << "," << src.t << "\n";

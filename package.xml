@@ -31,7 +31,11 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
+  <build_depend>rslidar_msgs</build_depend>
 
+  <build_depend>ndt_omp</build_depend>
+  <exec_depend>ndt_omp</exec_depend>
+  
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
 
